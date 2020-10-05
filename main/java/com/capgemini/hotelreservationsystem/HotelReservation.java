@@ -18,11 +18,11 @@ public class HotelReservation
 	
 	/**
 	 * @param hotelName
-	 * @param regularCustRate
+	 * @param weekdayRegularCustRate,int weekendRegularCustRate
 	 * @return true if hotel is added
 	 */
-	public boolean addHotel(String hotelName, int regularCustRate) {
-		Hotel hotel = new Hotel(hotelName,regularCustRate);
+	public boolean addHotel(String hotelName, int weekdayRegularCustRate,int weekendRegularCustRate) {
+		Hotel hotel = new Hotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate);
 		hotelList.add(hotel);
 		return true;
 	}
@@ -43,8 +43,8 @@ public class HotelReservation
 		}
         long noOfDays = 1+(endDate.getTime()- startDate.getTime())/1000/60/60/24;
         
-        Hotel cheapestHotel = hotelList.stream().sorted(Comparator.comparing(Hotel::getRegularCustRate)).findFirst().orElse(null);
-        long totalRate = noOfDays*cheapestHotel.getRegularCustRate();
+        Hotel cheapestHotel = hotelList.stream().sorted(Comparator.comparing(Hotel::getWeekdayRegularCustRate)).findFirst().orElse(null);
+        long totalRate = noOfDays*cheapestHotel.getWeekdayRegularCustRate();
         cheapestHotel.setTotalRate(totalRate);
         
 		return cheapestHotel;
@@ -60,18 +60,20 @@ public class HotelReservation
     	
         System.out.println( "Welcome to Hotel Reservation System Program" );
         
-        hotelReservation.addHotel("Lakewood", 110);
-        hotelReservation.addHotel("Bridgewood", 160);
-        hotelReservation.addHotel("Ridgewood", 220);
+        hotelReservation.addHotel("Lakewood", 110, 90);
+        hotelReservation.addHotel("Bridgewood", 160, 60);
+        hotelReservation.addHotel("Ridgewood", 220, 150);
         
         System.out.println("Do you want to add a Hotel?(Y/N)");
         char choice = sc.nextLine().charAt(0);
         while(choice=='Y') {
 	        System.out.println("Add a hotel \nEnter hotel name:");
 	        String hotelName = sc.nextLine();
-	        System.out.println("Enter regular customer rate:");
-	        int regularCustRate = Integer.parseInt(sc.nextLine());
-	        hotelReservation.addHotel(hotelName,regularCustRate);
+	        System.out.println("Enter weekday regular customer rate:");
+	        int weekdayRegularCustRate = Integer.parseInt(sc.nextLine());
+	        System.out.println("Enter weekend regular customer rate:");
+	        int weekendRegularCustRate = Integer.parseInt(sc.nextLine());
+	        hotelReservation.addHotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate);
 	        System.out.println("Do you want to add another Hotel?(Y/N)");
 	        choice = sc.nextLine().charAt(0);
         }
