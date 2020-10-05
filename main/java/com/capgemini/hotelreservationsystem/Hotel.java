@@ -1,8 +1,13 @@
 package com.capgemini.hotelreservationsystem;
 
+/**
+ * @author Rachit
+ *
+ */
 public class Hotel {
 	private String hotelName;
 	private int regularCustRate;
+	private long totalRate;
 	
 	public Hotel(String hotelName,int regularCustRate) {
 		this.hotelName = hotelName;
@@ -25,4 +30,11 @@ public class Hotel {
 		this.regularCustRate = regularCustRate;
 	}
 	
+	public long getTotalRate() {
+		return totalRate;
+	}
+
+	public void setTotalRate(long totalRate) {
+		this.totalRate = totalRate;
+	}
 }
