@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * Ability to add ratings to each hotel
+ * Ability to find the Best Rated Hotel for a given Date Range
  *
  */
 public class HotelReservation 
@@ -30,21 +30,46 @@ public class HotelReservation
 	}
 	
 	/**
-	 * @param start
-	 * @param end
-	 * @return Cheapest hotel (UC2)
+	 * @param String date
+	 * @return Date date
 	 */
-	public Hotel findCheapestBestRatedHotel(String startD, String endD) {
-		Date startDate=null;
-        Date endDate = null;
+	public Date parseDate(String date) {
         try {
-			startDate = new SimpleDateFormat("dd-MMM-yyyy").parse(startD);
-			endDate = new SimpleDateFormat("dd-MMM-yyyy").parse(endD); 
+			return new SimpleDateFormat("dd-MMM-yyyy").parse(date);
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
+			return null;
 		}
-        long noOfDays = 1+(endDate.getTime()- startDate.getTime())/1000/60/60/24;
-        
+	}
+	
+	/**
+	 * @param startD
+	 * @param endD
+	 * @return noOfDays between start and end date
+	 */
+	public long getNoOfDays(String startD,String endD) {
+		Date startDate=null;
+        Date endDate = null;
+        startDate = parseDate(startD);
+        endDate = parseDate(endD); 
+        if(startDate.getTime()<endDate.getTime()) {
+	        long noOfDays = 1+(endDate.getTime()- startDate.getTime())/1000/60/60/24;
+			return noOfDays;
+        }
+        else 
+        	return 0;
+	}
+	
+	/**
+	 * @param startD
+	 * @param endD
+	 * @return noOfWeekdays between start and end date
+	 */
+	public long getNoOfWeekdays(String startD, String endD) {
+		Date startDate=null;
+        Date endDate = null;
+        startDate = parseDate(startD);
+        endDate = parseDate(endD); 
         Calendar startCal = Calendar.getInstance();
         startCal.setTime(startDate);        
 
@@ -52,35 +77,86 @@ public class HotelReservation
         endCal.setTime(endDate);
         long noOfWeekdays = 0;
         if (startCal.getTimeInMillis() < endCal.getTimeInMillis()) {
-        
         do {
             if (startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SATURDAY && startCal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
                 ++noOfWeekdays;
             }
             startCal.add(Calendar.DAY_OF_MONTH, 1);
         } while (startCal.getTimeInMillis() <= endCal.getTimeInMillis()); 
-        
-        long noOfWeekends = noOfDays - noOfWeekdays;
-        
-        for(Hotel hotel: hotelList) {
-        	long totalRate = noOfWeekdays*hotel.getWeekdayRegularCustRate()+noOfWeekends*hotel.getWeekendRegularCustRate();
-        	hotel.setTotalRate(totalRate);
-        }
-        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getTotalRate)).collect(Collectors.toList());
-        
-        Hotel cheapestHotel = sortedHotelList.get(0);
-        long cheapestRate= sortedHotelList.get(0).getTotalRate();
-        for(Hotel hotel:sortedHotelList) {
-        	if(hotel.getTotalRate()<=cheapestRate) {
-        		if(hotel.getRating()>cheapestHotel.getRating())
-        			cheapestHotel = hotel;
-        	}
-        	else 
-        		break;
-        }
-		return cheapestHotel;
+        return noOfWeekdays;
         }
         else 
+        	return 0;
+	}
+	
+	/**
+	 * @param noOfWeekdays
+	 * @param noOfWeekends
+	 * Sets total rate for each hotel
+	 */
+	public void setTotalRateForHotels(long noOfWeekdays,long noOfWeekends) {
+		for(Hotel hotel: hotelList) {
+        	long totalRate = noOfWeekdays*hotel.getWeekdayRegularCustRate()+noOfWeekends*hotel.getWeekendRegularCustRate();
+        	hotel.setTotalRate(totalRate);
+		}
+	}
+	
+	/**
+	 * @param start
+	 * @param end
+	 * @return Cheapest best rated hotel (UC6)
+	 */
+	public Hotel findCheapestBestRatedHotel(String startD, String endD) {
+		long noOfWeekdays = getNoOfWeekdays(startD, endD);
+		long noOfDays = getNoOfDays(startD, endD);
+        long noOfWeekends = noOfDays - noOfWeekdays;
+        
+        if(noOfDays>0){
+        	setTotalRateForHotels(noOfWeekdays,noOfWeekends);
+	        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getTotalRate)).collect(Collectors.toList());
+	        
+	        Hotel cheapestHotel = sortedHotelList.get(0);
+	        long cheapestRate= sortedHotelList.get(0).getTotalRate();
+	        for(Hotel hotel:sortedHotelList) {
+	        	if(hotel.getTotalRate()<=cheapestRate) {
+	        		if(hotel.getRating()>cheapestHotel.getRating())
+	        			cheapestHotel = hotel;
+	        	}
+	        	else 
+	        		break;
+	        }
+			return cheapestHotel;
+	    }
+        else
+        	return null;
+	}
+
+	/**
+	 * @param start
+	 * @param end
+	 * @return Best rated hotel
+	 */
+	public Hotel findBestRatedHotel(String startD, String endD) {
+		long noOfWeekdays = getNoOfWeekdays(startD, endD);
+		long noOfDays = getNoOfDays(startD, endD);
+        long noOfWeekends = noOfDays - noOfWeekdays;
+        
+        if(noOfDays>0){
+        	setTotalRateForHotels(noOfWeekdays,noOfWeekends);
+	        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getRating).reversed()).collect(Collectors.toList());
+	        Hotel bestRatedHotel = sortedHotelList.get(0);
+	        int bestHotelRating= sortedHotelList.get(0).getRating();
+	        for(Hotel hotel:sortedHotelList) {
+	        	if(hotel.getRating()>=bestHotelRating) {
+	        		if(hotel.getTotalRate()<bestRatedHotel.getTotalRate())
+	        			bestRatedHotel = hotel;
+	        	}
+	        	else 
+	        		break;
+	        }
+			return bestRatedHotel;
+	    }
+        else
         	return null;
 	}
 	
@@ -100,8 +176,8 @@ public class HotelReservation
         //initialize
         
         System.out.println("Do you want to add a Hotel?(Y/N)");
-        char choice = sc.nextLine().charAt(0);
-        while(choice=='Y') {
+        char addChoice = sc.nextLine().charAt(0);
+        while(addChoice=='Y') {
 	        System.out.println("Add a hotel \nEnter hotel name:");
 	        String hotelName = sc.nextLine();
 	        System.out.println("Enter weekday regular customer rate:");
@@ -112,18 +188,32 @@ public class HotelReservation
 	        int rating = Integer.parseInt(sc.nextLine());
 	        hotelReservation.addHotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate,rating);
 	        System.out.println("Do you want to add another Hotel?(Y/N)");
-	        choice = sc.nextLine().charAt(0);
+	        addChoice = sc.nextLine().charAt(0);
         }
-        
+        System.out.println("Enter your choice: \n1)Find the cheapest best rated hotel \n2) Find the best rated hotel ");
+        int choice = Integer.parseInt(sc.nextLine());
         System.out.println("Enter date range to find hotel in format(dd-MMM-yyyy)");
         System.out.println("Enter start date");
         String start = sc.nextLine();
         System.out.println("Enter end date");
         String end = sc.nextLine();
-        Hotel cheapestHotel = hotelReservation.findCheapestBestRatedHotel(start,end);
-        if(cheapestHotel!=null)
-        	System.out.println(cheapestHotel.getHotelName()+", Rating: "+cheapestHotel.getRating()+", Total rates :$"+cheapestHotel.getTotalRate());
-        else 
-        	System.out.println("Improper dates entered");
+        
+        switch(choice) {
+	        case 1:
+		        Hotel cheapestHotel = hotelReservation.findCheapestBestRatedHotel(start,end);
+		        if(cheapestHotel!=null)
+		        	System.out.println(cheapestHotel.getHotelName()+", Rating: "+cheapestHotel.getRating()+", Total rate :$"+cheapestHotel.getTotalRate());
+		        else 
+		        	System.out.println("Improper dates entered");
+		        break;
+	        case 2:
+	        	Hotel bestRatedHotel = hotelReservation.findBestRatedHotel(start,end);
+	        	if(bestRatedHotel!=null)
+		        	System.out.println(bestRatedHotel.getHotelName()+", Rating: "+bestRatedHotel.getRating()+", Total rate :$"+bestRatedHotel.getTotalRate());
+		        else 
+		        	System.out.println("Improper dates entered");
+		        break;
+	   }
+    	System.out.println("Thank you for using the application");
     }
 }
