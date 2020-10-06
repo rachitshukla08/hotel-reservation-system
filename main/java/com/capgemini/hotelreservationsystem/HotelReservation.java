@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * Ability to find the Best Rated Hotel for a given Date Range
+ * Ability to find the cheapest best rated hotel Hotel for a given Date Range for a Reward Customer 
  *
  */
 public class HotelReservation 
