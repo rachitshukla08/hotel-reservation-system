@@ -26,7 +26,7 @@ public class HotelTest
         hotelReservation.addHotel("Lakewood", 110, 90, 3);
         hotelReservation.addHotel("Bridgewood", 160, 60, 4);
         hotelReservation.addHotel("Ridgewood", 220, 150, 5);
-    	Hotel hotel = hotelReservation.findCheapestHotel("01-Oct-2020", "06-Oct-2020");
+    	Hotel hotel = hotelReservation.findCheapestBestRatedHotel("01-Oct-2020", "06-Oct-2020");
     	assertEquals("Lakewood", hotel.getHotelName());
     }
     @Test 
@@ -34,7 +34,16 @@ public class HotelTest
         hotelReservation.addHotel("Lakewood", 110, 90, 3);
         hotelReservation.addHotel("Bridgewood", 160, 60, 4);
         hotelReservation.addHotel("Ridgewood", 220, 150, 5);
-    	Hotel hotel = hotelReservation.findCheapestHotel("06-Oct-2020", "01-Oct-2020");
+    	Hotel hotel = hotelReservation.findCheapestBestRatedHotel("06-Oct-2020", "01-Oct-2020");
     	assertEquals(null, hotel);
+    }
+    @Test 
+    public void whenGivenDateRange_ShouldReturnBetterRatedCheapestHotel() {
+        hotelReservation.addHotel("Lakewood", 110, 90, 3);
+        hotelReservation.addHotel("Best Hotel", 110, 90, 5);
+        hotelReservation.addHotel("Bridgewood", 160, 60, 4);
+        hotelReservation.addHotel("Ridgewood", 220, 150, 5);
+    	Hotel hotel = hotelReservation.findCheapestBestRatedHotel("01-Oct-2020", "06-Oct-2020");
+    	assertEquals("Best Hotel", hotel.getHotelName());
     }
 }

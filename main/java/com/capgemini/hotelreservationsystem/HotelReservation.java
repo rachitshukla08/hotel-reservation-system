@@ -8,6 +8,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Ability to add ratings to each hotel
@@ -33,7 +34,7 @@ public class HotelReservation
 	 * @param end
 	 * @return Cheapest hotel (UC2)
 	 */
-	public Hotel findCheapestHotel(String startD, String endD) {
+	public Hotel findCheapestBestRatedHotel(String startD, String endD) {
 		Date startDate=null;
         Date endDate = null;
         try {
@@ -60,14 +61,23 @@ public class HotelReservation
         } while (startCal.getTimeInMillis() <= endCal.getTimeInMillis()); 
         
         long noOfWeekends = noOfDays - noOfWeekdays;
-        System.out.println("Weekends "+ noOfWeekends +"Weekdays "+noOfWeekdays);
         
         for(Hotel hotel: hotelList) {
         	long totalRate = noOfWeekdays*hotel.getWeekdayRegularCustRate()+noOfWeekends*hotel.getWeekendRegularCustRate();
         	hotel.setTotalRate(totalRate);
         }
-        Hotel cheapestHotel = hotelList.stream().sorted(Comparator.comparing(Hotel::getTotalRate)).findFirst().orElse(null);
+        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getTotalRate)).collect(Collectors.toList());
         
+        Hotel cheapestHotel = sortedHotelList.get(0);
+        long cheapestRate= sortedHotelList.get(0).getTotalRate();
+        for(Hotel hotel:sortedHotelList) {
+        	if(hotel.getTotalRate()<=cheapestRate) {
+        		if(hotel.getRating()>cheapestHotel.getRating())
+        			cheapestHotel = hotel;
+        	}
+        	else 
+        		break;
+        }
 		return cheapestHotel;
         }
         else 
@@ -110,9 +120,9 @@ public class HotelReservation
         String start = sc.nextLine();
         System.out.println("Enter end date");
         String end = sc.nextLine();
-        Hotel cheapestHotel = hotelReservation.findCheapestHotel(start,end);
+        Hotel cheapestHotel = hotelReservation.findCheapestBestRatedHotel(start,end);
         if(cheapestHotel!=null)
-        	System.out.println(cheapestHotel.getHotelName()+", Total rates :$"+cheapestHotel.getTotalRate());
+        	System.out.println(cheapestHotel.getHotelName()+", Rating: "+cheapestHotel.getRating()+", Total rates :$"+cheapestHotel.getTotalRate());
         else 
         	System.out.println("Improper dates entered");
     }
