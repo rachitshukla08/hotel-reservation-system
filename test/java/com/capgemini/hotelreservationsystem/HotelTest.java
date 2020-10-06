@@ -7,7 +7,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * Unit test for simple App.
+ * Tests for Hotel Reservation.
  */
 public class HotelTest 
 {
@@ -18,15 +18,23 @@ public class HotelTest
 	}
     @Test
     public void whenHotelAdded_ShouldReturnTrue() {
-    	boolean isHotelAdded = hotelReservation.addHotel("Lakewood",110, 90);
+    	boolean isHotelAdded = hotelReservation.addHotel("Lakewood",110, 90,3);
         assertTrue(isHotelAdded);
     }
     @Test 
     public void whenGivenDate_OneToSixOct2020_ShouldReturnLakewoodHotelCheapest() {
-        hotelReservation.addHotel("Lakewood", 110, 90);
-        hotelReservation.addHotel("Bridgewood", 160, 60);
-        hotelReservation.addHotel("Ridgewood", 220, 150);
+        hotelReservation.addHotel("Lakewood", 110, 90, 3);
+        hotelReservation.addHotel("Bridgewood", 160, 60, 4);
+        hotelReservation.addHotel("Ridgewood", 220, 150, 5);
     	Hotel hotel = hotelReservation.findCheapestHotel("01-Oct-2020", "06-Oct-2020");
     	assertEquals("Lakewood", hotel.getHotelName());
+    }
+    @Test 
+    public void whenGivenDate_Improper_ShouldReturnNull() {
+        hotelReservation.addHotel("Lakewood", 110, 90, 3);
+        hotelReservation.addHotel("Bridgewood", 160, 60, 4);
+        hotelReservation.addHotel("Ridgewood", 220, 150, 5);
+    	Hotel hotel = hotelReservation.findCheapestHotel("06-Oct-2020", "01-Oct-2020");
+    	assertEquals(null, hotel);
     }
 }
