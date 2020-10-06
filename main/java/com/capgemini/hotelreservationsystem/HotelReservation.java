@@ -23,8 +23,9 @@ public class HotelReservation
 	 * @param weekdayRegularCustRate,int weekendRegularCustRate
 	 * @return true if hotel is added
 	 */
-	public boolean addHotel(String hotelName, int weekdayRegularCustRate,int weekendRegularCustRate,int rating) {
-		Hotel hotel = new Hotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate,rating);
+	public boolean addHotel(String hotelName, int weekdayRegularCustRate, int weekendRegularCustRate, int rating,
+			int weekdayRewardCustRate, int weekendRewardCustRate) {
+		Hotel hotel = new Hotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate,rating,weekdayRewardCustRate,weekendRewardCustRate);
 		hotelList.add(hotel);
 		return true;
 	}
@@ -94,10 +95,18 @@ public class HotelReservation
 	 * @param noOfWeekends
 	 * Sets total rate for each hotel
 	 */
-	public void setTotalRateForHotels(long noOfWeekdays,long noOfWeekends) {
-		for(Hotel hotel: hotelList) {
-        	long totalRate = noOfWeekdays*hotel.getWeekdayRegularCustRate()+noOfWeekends*hotel.getWeekendRegularCustRate();
-        	hotel.setTotalRate(totalRate);
+	public void setTotalRateForHotels(long noOfWeekdays,long noOfWeekends,Customer customer) {
+		if(customer.getCustomerType().equals("regular")) {
+			for(Hotel hotel: hotelList) {
+	        	long totalRate = noOfWeekdays*hotel.getWeekdayRegularCustRate()+noOfWeekends*hotel.getWeekendRegularCustRate();
+	        	hotel.setTotalRate(totalRate);
+			}
+		}
+		else if(customer.getCustomerType().equals("reward")) {
+			for(Hotel hotel: hotelList) {
+	        	long totalRate = noOfWeekdays*hotel.getWeekdayRewardCustRate()+noOfWeekends*hotel.getWeekendRewardCustRate();
+	        	hotel.setTotalRate(totalRate);
+			}
 		}
 	}
 	
@@ -106,13 +115,13 @@ public class HotelReservation
 	 * @param end
 	 * @return Cheapest best rated hotel (UC6)
 	 */
-	public Hotel findCheapestBestRatedHotel(String startD, String endD) {
+	public Hotel findCheapestBestRatedHotel(String startD, String endD,Customer customer) {
 		long noOfWeekdays = getNoOfWeekdays(startD, endD);
 		long noOfDays = getNoOfDays(startD, endD);
         long noOfWeekends = noOfDays - noOfWeekdays;
         
         if(noOfDays>0){
-        	setTotalRateForHotels(noOfWeekdays,noOfWeekends);
+        	setTotalRateForHotels(noOfWeekdays,noOfWeekends,customer);
 	        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getTotalRate)).collect(Collectors.toList());
 	        
 	        Hotel cheapestHotel = sortedHotelList.get(0);
@@ -136,13 +145,13 @@ public class HotelReservation
 	 * @param end
 	 * @return Best rated hotel
 	 */
-	public Hotel findBestRatedHotel(String startD, String endD) {
+	public Hotel findBestRatedHotel(String startD, String endD,Customer customer) {
 		long noOfWeekdays = getNoOfWeekdays(startD, endD);
 		long noOfDays = getNoOfDays(startD, endD);
         long noOfWeekends = noOfDays - noOfWeekdays;
         
         if(noOfDays>0){
-        	setTotalRateForHotels(noOfWeekdays,noOfWeekends);
+        	setTotalRateForHotels(noOfWeekdays,noOfWeekends,customer);
 	        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getRating).reversed()).collect(Collectors.toList());
 	        Hotel bestRatedHotel = sortedHotelList.get(0);
 	        int bestHotelRating= sortedHotelList.get(0).getRating();
@@ -167,12 +176,20 @@ public class HotelReservation
     {
     	Scanner sc = new Scanner(System.in);
     	HotelReservation hotelReservation = new HotelReservation();
+    	Customer customer = new Customer();
+    	customer.setCustomerType("regular");
     	
         System.out.println( "Welcome to Hotel Reservation System Program" );
+        System.out.println("Enter 1 if you are a regular customer \nEnter 2 if you are reward customer");
+        if(Integer.parseInt(sc.nextLine())==1) {
+        	customer.setCustomerType("regular");
+        }
+        else 
+        	customer.setCustomerType("reward");
         
-        hotelReservation.addHotel("Lakewood", 110, 90, 3);
-        hotelReservation.addHotel("Bridgewood", 160, 60, 4);
-        hotelReservation.addHotel("Ridgewood", 220, 150, 5);
+        hotelReservation.addHotel("Lakewood", 110, 90, 3, 80, 80);
+        hotelReservation.addHotel("Bridgewood", 160, 60, 4, 110, 50);
+        hotelReservation.addHotel("Ridgewood", 220, 150, 5, 100, 40);
         //initialize
         
         System.out.println("Do you want to add a Hotel?(Y/N)");
@@ -186,7 +203,11 @@ public class HotelReservation
 	        int weekendRegularCustRate = Integer.parseInt(sc.nextLine());
 	        System.out.println("Enter Rating");
 	        int rating = Integer.parseInt(sc.nextLine());
-	        hotelReservation.addHotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate,rating);
+	        System.out.println("Enter weekday reward customer rate:");
+	        int weekdayRewardCustRate = Integer.parseInt(sc.nextLine());
+	        System.out.println("Enter weekend reward customer rate");
+	        int weekendRewardCustRate = Integer.parseInt(sc.nextLine());
+	        hotelReservation.addHotel(hotelName,weekdayRegularCustRate,weekendRegularCustRate,rating,weekdayRewardCustRate,weekendRewardCustRate);
 	        System.out.println("Do you want to add another Hotel?(Y/N)");
 	        addChoice = sc.nextLine().charAt(0);
         }
@@ -200,14 +221,14 @@ public class HotelReservation
         
         switch(choice) {
 	        case 1:
-		        Hotel cheapestHotel = hotelReservation.findCheapestBestRatedHotel(start,end);
+		        Hotel cheapestHotel = hotelReservation.findCheapestBestRatedHotel(start,end,customer);
 		        if(cheapestHotel!=null)
 		        	System.out.println(cheapestHotel.getHotelName()+", Rating: "+cheapestHotel.getRating()+", Total rate :$"+cheapestHotel.getTotalRate());
 		        else 
 		        	System.out.println("Improper dates entered");
 		        break;
 	        case 2:
-	        	Hotel bestRatedHotel = hotelReservation.findBestRatedHotel(start,end);
+	        	Hotel bestRatedHotel = hotelReservation.findBestRatedHotel(start,end,customer);
 	        	if(bestRatedHotel!=null)
 		        	System.out.println(bestRatedHotel.getHotelName()+", Rating: "+bestRatedHotel.getRating()+", Total rate :$"+bestRatedHotel.getTotalRate());
 		        else 
