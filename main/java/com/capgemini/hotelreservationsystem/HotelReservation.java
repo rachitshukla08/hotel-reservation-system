@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.stream.Collectors;
 
 /**
- * Ability to find the cheapest best rated hotel Hotel for a given Date Range for a Reward Customer 
+ * Ability to find the cheapest best rated Hotel for a given Date Range for a Reward Customer using Java Streams 
  *
  */
 public class HotelReservation 
@@ -153,6 +153,7 @@ public class HotelReservation
         if(noOfDays>0){
         	setTotalRateForHotels(noOfWeekdays,noOfWeekends,customer);
 	        List<Hotel> sortedHotelList = hotelList.stream().sorted(Comparator.comparing(Hotel::getRating).reversed()).collect(Collectors.toList());
+	        
 	        Hotel bestRatedHotel = sortedHotelList.get(0);
 	        int bestHotelRating= sortedHotelList.get(0).getRating();
 	        for(Hotel hotel:sortedHotelList) {
